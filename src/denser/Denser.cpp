@@ -711,6 +711,10 @@ LPWSTR Denser::LoadFileInResource(int name, int type)
 
 HRESULT Denser::ExecuteEventLoop()
 {
+	v8::Isolate::Scope is(this->isolate);
+	v8::Context::Scope cs(this->context);
+	v8::HandleScope hs;
+
 	return this->loop->RunLoop();
 }
 
