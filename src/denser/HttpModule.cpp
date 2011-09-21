@@ -58,6 +58,7 @@ HRESULT HttpRequestBodyChunkEvent::Execute(v8::Handle<v8::Context> context)
 	
 	v8::Handle<v8::Value> argv[] = { bodyChunk };
 	v8::Handle<v8::Value> v = this->ctx->denser->httpManager->callback->CallAsFunction(context->Global(), 1, argv);
+	ErrorIf(S_OK != this->ctx->denser->log->Log(tryCatch));
 	if (v.IsEmpty())
 	{
 		// Processing of HTTP body chunk failed. The error is non-fatal, issue a new HTTP request instead.
@@ -104,6 +105,7 @@ HRESULT HttpStateTransitionEvent::Execute(v8::Handle<v8::Context> context)
 	
 	v8::Handle<v8::Value> argv[] = { stateData };
 	v8::Handle<v8::Value> v = this->denser->httpManager->callback->CallAsFunction(context->Global(), 1, argv);
+	ErrorIf(S_OK != this->denser->log->Log(tryCatch));
 	if (v.IsEmpty())
 	{
 		// Processing of HTTP body chunk failed. The error is non-fatal, issue a new HTTP request instead.
@@ -290,6 +292,7 @@ HRESULT HttpRequestHeadersEvent::Execute(v8::Handle<v8::Context> context)
 	
 	v8::Handle<v8::Value> argv[] = { httpRequest };
 	v8::Handle<v8::Value> v = this->ctx->denser->httpManager->callback->CallAsFunction(context->Global(), 1, argv);
+	ErrorIf(S_OK != this->ctx->denser->log->Log(tryCatch));
 	if (v.IsEmpty())
 	{
 		// Processing of HTTP body chunk failed. The error is non-fatal, issue a new HTTP request instead.

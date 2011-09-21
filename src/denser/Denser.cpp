@@ -115,6 +115,7 @@ HRESULT Denser::ExecuteScript(LPWSTR script)
 	v8::Handle<v8::String> sh = v8::String::New((uint16_t*)this->script);
 	v8::Handle<v8::Script> s = v8::Script::Compile(sh, NULL, NULL);
 	v8::Handle<v8::Value> v = s->Run();
+	ErrorIf(S_OK != this->log->Log(tryCatch));
 	ErrorIf(v.IsEmpty());
 
 	return S_OK;
@@ -147,7 +148,7 @@ v8::Handle<v8::Value> Denser::PostEventDelayed(const v8::Arguments& args)
     JS_ARGS
 
 	dueTimeIn = args[1]->Int32Value();
-	ev = (Event*)new SimpleEvent(args[0]->ToObject(), 0, NULL);
+	ev = (Event*)new SimpleEvent(denser, args[0]->ToObject(), 0, NULL);
 	ErrorIf(S_OK != denser->loop->PostEvent(ev, dueTimeIn));
 	
 	return v8::Undefined();
@@ -167,7 +168,7 @@ v8::Handle<v8::Value> Denser::PostEventAsap(const v8::Arguments& args)
 
     JS_ARGS
 
-	SimpleEvent* ev = new SimpleEvent(args[0]->ToObject(), 0, NULL);
+	SimpleEvent* ev = new SimpleEvent(denser, args[0]->ToObject(), 0, NULL);
 	ErrorIf(S_OK != denser->loop->PostEvent((Event*)ev));
 
 	return v8::Undefined();
@@ -401,6 +402,7 @@ HRESULT Denser::CreateModuleFromString(v8::Handle<v8::String> name, LPWSTR scrip
 	
 	v8::Handle<v8::Script> s = v8::Script::Compile(v8::String::New((uint16_t*)script), NULL, NULL);
 	v8::Handle<v8::Value> v = s->Run();
+	ErrorIf(S_OK != this->log->Log(tryCatch));
 	ErrorIf(v.IsEmpty());
 
 	if (!currentExports.IsEmpty())

@@ -22,5 +22,6 @@ public:
 	~LogModule();
 
 	HRESULT Log(LPCWSTR entry);
+	HRESULT Log(v8::TryCatch tryCatch);
 	HRESULT GetLog(v8::Handle<v8::Object>& result);
 };

@@ -165,7 +165,7 @@ HRESULT HttpManager::StopListen()
 
 HRESULT HttpManager::EnterShutdownMode()
 {
-	Event* ev = (Event *) new SimpleEvent(this->shutdown, 0, NULL);
+	Event* ev = (Event *) new SimpleEvent(this->denser, this->shutdown, 0, NULL);
 	ev->ignorable = false;
 	return this->denser->loop->PostEvent(ev);
 }

@@ -24,6 +24,24 @@ LogModule::~LogModule()
 	DeleteCriticalSection(&this->syncRoot);
 }
 
+HRESULT LogModule::Log(v8::TryCatch tryCatch)
+{
+	if (tryCatch.HasCaught())
+	{
+		v8::Handle<v8::Value> exception = tryCatch.Exception();
+		v8::String::Value message(exception);
+		if (*message) {
+			return this->Log((LPCWSTR)*message);
+		}
+		else
+		{
+			return E_FAIL;
+		}
+	}
+
+	return S_OK;
+}
+
 // implements circular buffer logic
 HRESULT LogModule::Log(LPCWSTR entry)
 {

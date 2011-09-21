@@ -2,6 +2,8 @@
 
 #include "stdafx.h"
 
+class Denser;
+
 class Event
 {
 public:
@@ -19,9 +21,10 @@ private:
 	v8::Persistent<v8::Object> func;
 	int argc;
 	v8::Persistent<v8::Value>* argv;
+	Denser* denser;
 
 public:
-	SimpleEvent(v8::Handle<v8::Object> func, int argc, v8::Handle<v8::Value>* argv);
+	SimpleEvent(Denser* denser, v8::Handle<v8::Object> func, int argc, v8::Handle<v8::Value>* argv);
 	virtual ~SimpleEvent();
 
 	virtual HRESULT Execute(v8::Handle<v8::Context> context);

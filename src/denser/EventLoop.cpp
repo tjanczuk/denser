@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
-SimpleEvent::SimpleEvent(v8::Handle<v8::Object> func, int argc, v8::Handle<v8::Value>* argv)
-	: Event(), argc(argc), argv(NULL)
+SimpleEvent::SimpleEvent(Denser* denser, v8::Handle<v8::Object> func, int argc, v8::Handle<v8::Value>* argv)
+	: Event(), argc(argc), argv(NULL), denser(denser)
 {
 	this->func = v8::Persistent<v8::Object>::New(func);
 	if (argc > 0)
@@ -42,6 +42,10 @@ HRESULT SimpleEvent::Execute(v8::Handle<v8::Context> context)
 		v8::TryCatch tryCatch;
 		v8::Handle<v8::Object> global = context->Global();
 		v8::Handle<v8::Value> v = this->func->CallAsFunction(global, this->argc, this->argv);
+		if (this->denser)
+		{
+			ErrorIf(S_OK != this->denser->log->Log(tryCatch))
+		}
 		if (v.IsEmpty())
 		{
 			return E_FAIL;
@@ -55,6 +59,8 @@ HRESULT SimpleEvent::Execute(v8::Handle<v8::Context> context)
 	{
 		return E_FAIL;
 	}
+Error:
+	return E_FAIL;
 }
 
 EventLoop::EventLoop(LONG maxPendingEvents, Denser* denser)
