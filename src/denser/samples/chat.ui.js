@@ -155,7 +155,7 @@
         var uptimeSeconds = (new Date() - start) / 1000;
         var result = '<p>Denser server uptime is ' + Math.floor(uptimeSeconds / 3600) + ' hours, ' + Math.floor((uptimeSeconds % 3600) / 60) + ' minutes, ' + Math.floor(uptimeSeconds % 60) + ' seconds.</p>' +
             '<p>Program ID:<br/>' + programId + '</p>' + 
-            '<div class="usage-stats-container"><table class="usage-stats-table"><tr class="usage-stats-header"><td colspan="4">CPU usage (sub-thread level)</td></tr><tr class="usage-stats-entry"><th>Metric</th><th>Total</th><th>JavaScript&nbsp;only</th><th>JavaScript&nbsp;share&nbsp;[%]</th></tr>' +
+            '<div class="usage-stats-container"><table class="usage-stats-table"><tr class="usage-stats-header"><td colspan="4">CPU usage</td></tr><tr class="usage-stats-entry"><th>Metric</th><th>Total</th><th>JavaScript&nbsp;only</th><th>JavaScript&nbsp;share&nbsp;[%]</th></tr>' +
             '<tr class="usage-stats-entry"><td>CPU&nbsp;cycles&nbsp;[#]</td><td>' + stats.cpu.threadCpuCycles + '</td><td>' + stats.cpu.applicationCpuCycles + '</td><td>' + (stats.cpu.applicationShareOfThreadTime * 100).toFixed(1) + '</td></tr>' +
             '</table></div>' +
             '<div class="usage-stats-container">' +
@@ -167,8 +167,10 @@
             '<tr class="usage-stats-entry"><th>Aborted&nbsp;requests</th><td>' + stats.http.httpServerRequestsAborted + '</td></tr>' +
             '<tr class="usage-stats-entry"><th>Active&nbsp;requests</th><td>' + stats.http.httpServerRequestsActive + '</td></tr>' +
             '</table></td><td class="usage-stats-column">' +
-            '<table class="usage-stats-table"><tr class="usage-stats-header"><td>Memory usage</td></tr>' +
-            '<tr class="usage-stats-entry"><td>(coming up...)</td></tr></table>' +
+            '<table class="usage-stats-table"><tr class="usage-stats-header"><td colspan="2">Memory usage</td></tr>' +
+            '<tr class="usage-stats-entry"><th>Used heap size</th><td>' + stats.memory.usedHeapSize + '</td></tr>' +
+            '<tr class="usage-stats-entry"><th>Total heap size</th><td>' + stats.memory.totalHeapSize + '</td></tr>' +
+            '<tr class="usage-stats-entry"><th>Total heap size executable</th><td>' + stats.memory.totalHeapSizeExecutable + '</td></tr></table>' +
             '</td></tr></table></div>';
 
         return result;

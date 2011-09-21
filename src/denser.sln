@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "denser", "denser\denser.vcxproj", "{611AA8C9-7927-499C-AEFF-A9ED8D915B20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "denseradmin", "denseradmin\denseradmin.csproj", "{CD049324-72BA-4E92-89C0-F989B43CFA6B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cschat", "cschat\cschat.csproj", "{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,30 +27,6 @@ Global
 		{611AA8C9-7927-499C-AEFF-A9ED8D915B20}.Release|Win32.ActiveCfg = Release|Win32
 		{611AA8C9-7927-499C-AEFF-A9ED8D915B20}.Release|Win32.Build.0 = Release|Win32
 		{611AA8C9-7927-499C-AEFF-A9ED8D915B20}.Release|x86.ActiveCfg = Release|Win32
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Release|Win32.ActiveCfg = Release|Any CPU
-		{CD049324-72BA-4E92-89C0-F989B43CFA6B}.Release|x86.ActiveCfg = Release|Any CPU
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Debug|Win32.ActiveCfg = Debug|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Debug|x86.ActiveCfg = Debug|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Debug|x86.Build.0 = Debug|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Release|Any CPU.ActiveCfg = Release|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Release|Mixed Platforms.Build.0 = Release|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Release|Win32.ActiveCfg = Release|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Release|x86.ActiveCfg = Release|x86
-		{27FC5821-6DB1-47B0-98BD-816E9ADBE2B5}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

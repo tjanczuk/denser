@@ -43,10 +43,13 @@ HRESULT MeterModule::GetUsage(v8::Handle<v8::Object>& stats)
 HRESULT MeterModule::GetUsage(v8::Handle<v8::Context> context, bool getInProgressStats, v8::Handle<v8::Object>& stats)
 {
 	v8::HandleScope handleScope;
+	v8::HeapStatistics heap;
+	v8::V8::GetHeapStatistics(&heap);
 	v8::Context::Scope scope(context);
 	v8::Handle<v8::Object> result = v8::Object::New();
 	v8::Handle<v8::Object> cpu = v8::Object::New();
 	v8::Handle<v8::Object> http = v8::Object::New();
+	v8::Handle<v8::Object> memory = v8::Object::New();
 	ULONG64 applicationThreadCycleTime, totalThreadCycleTime;
 
 	// Create stats object
@@ -54,9 +57,11 @@ HRESULT MeterModule::GetUsage(v8::Handle<v8::Context> context, bool getInProgres
 	ErrorIf(result.IsEmpty());
 	ErrorIf(cpu.IsEmpty());
 	ErrorIf(http.IsEmpty());
+	ErrorIf(memory.IsEmpty());
 	ErrorIf(S_OK != ::SetGUIDProperty(result, L"programId", this->programId));
 	ErrorIf(S_OK != ::SetVarProperty(result, L"cpu", cpu));
 	ErrorIf(S_OK != ::SetVarProperty(result, L"http", http));	
+	ErrorIf(S_OK != ::SetVarProperty(result, L"memory", memory));	
 
 	// Calculate thread cycle time
 
@@ -70,6 +75,12 @@ HRESULT MeterModule::GetUsage(v8::Handle<v8::Context> context, bool getInProgres
 	{
 		ErrorIf(S_OK != ::SetULONG64Property(http, MeterModule::metricName[i], this->metric[i]));
 	}
+
+	// Add memory statistics
+
+	ErrorIf(S_OK != ::SetIntProperty(memory, L"usedHeapSize", heap.used_heap_size()));
+	ErrorIf(S_OK != ::SetIntProperty(memory, L"totalHeapSize", heap.total_heap_size()));
+	ErrorIf(S_OK != ::SetIntProperty(memory, L"totalHeapSizeExecutable", heap.total_heap_size_executable()));	
 
 	stats = handleScope.Close(result);
 

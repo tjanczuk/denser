@@ -87,7 +87,12 @@ public:
 
 #define JS_ARGS \
 	Denser* denser = NULL;\
-	DENSER_FROM_VAR(args, denser);\
+	{\
+	    v8::Local<v8::Object> self = v8::Local<v8::Object>::Cast(v8::Context::GetCurrent()->Global()->GetPrototype());\
+		v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));\
+		void* ptr = wrap->Value();\
+		denser = static_cast<Denser*>(ptr);\
+	};\
 	v8::Isolate::Scope is(denser->isolate);\
 	v8::Context::Scope cs(denser->context);\
 	v8::HandleScope hs;
