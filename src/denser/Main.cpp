@@ -12,6 +12,7 @@ BOOL WINAPI ControlHandler(DWORD type)
 HRESULT Help()
 {
 	_tprintf(_T("Usage: denser [/config <configfile>] | ([/admin <admin_url> (anonymous|<authorizationKey>)] [<jsfile>]*)\nNote: v8.dll must be in the same directory as denser.exe."));
+	_tprintf(_T("denser.exe --help for V8 options."));
 	return -1;
 }
 

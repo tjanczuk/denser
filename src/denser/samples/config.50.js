@@ -1,0 +1,61 @@
+{
+  "admin" : {
+    "url" : "http://*:80/denser/"
+   },
+   "programs" : [
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" },
+      { "file": "chat2.js" }
+   ]
+}
