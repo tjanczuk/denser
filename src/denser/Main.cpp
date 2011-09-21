@@ -11,7 +11,7 @@ BOOL WINAPI ControlHandler(DWORD type)
 
 HRESULT Help()
 {
-	_tprintf(_T("Usage: denser [/config <configfile>] | ([/admin <admin_url> (anonymous|<authorizationKey>)] [<jsfile>]*)\nNote: jscript9.dll must be in the same directory as denser.exe."));
+	_tprintf(_T("Usage: denser [/config <configfile>] | ([/admin <admin_url> (anonymous|<authorizationKey>)] [<jsfile>]*)\nNote: v8.dll must be in the same directory as denser.exe."));
 	return -1;
 }
 
@@ -76,16 +76,68 @@ int _tmain(int argc, _TCHAR* argv[])
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF ); // WARINING - this does not catch SysAllocStringLen allocation leaks
 
 	CAtlString config;
-	ErrorIf(S_OK != CreateConfig(argc, argv, &config));
+	char** argv1 = NULL;
+	char** argv1cpy = NULL;
+	_TCHAR** argv2 = NULL;
+
+	ErrorIf(NULL == (argv1 = new char*[argc + 1]));
+	RtlZeroMemory(argv1, sizeof(char*) * (argc + 1));
+	for (int i = 0; i < argc; i++)
+	{
+		ErrorIf(NULL == (argv1[i] = (char*)::AllocUnicodeToAscii(argv[i], wcslen(argv[i]), NULL)));
+	}
+
+	ErrorIf(NULL == (argv1cpy = new char*[argc + 1]));
+	memcpy(argv1cpy, argv1, sizeof(char*) * (argc + 1));
+
+	v8::V8::SetFlagsFromCommandLine(&argc, argv1, true);
+
+	ErrorIf(NULL == (argv2 = new _TCHAR*[argc + 1]));
+	RtlZeroMemory(argv2, sizeof(_TCHAR*) * (argc + 1));
+	for (int i = 0; i < argc; i++)
+	{
+		ErrorIf(NULL == (argv2[i] = (_TCHAR*)::AllocAsciiToUnicode(argv1[i], strlen(argv1[i]), NULL)));
+	}
+	
+	ErrorIf(S_OK != CreateConfig(argc, argv2, &config));
 	manager = new DenserManager();
 	ErrorIf(0 == SetConsoleCtrlHandler(::ControlHandler, TRUE));
 	HRESULT result = manager->Run(config);
 	delete manager;
 
+	for (char** arg = argv1cpy; *arg; arg++)
+		delete *arg;
+	delete argv1cpy;
+	delete argv1;
+	for (_TCHAR** arg = argv2; *arg; arg++)
+		delete *arg;
+	delete argv2;
+
 	_CrtDumpMemoryLeaks();
 
 	return result;
 Error:
+	if (argv1cpy)
+	{
+		for (char** arg = argv1cpy; *arg; arg++)
+			delete *arg;
+		delete argv1cpy;
+		delete argv1;
+	}
+	else if (argv1)
+	{
+		for (char** arg = argv1; *arg; arg++)
+			delete *arg;
+		delete argv1;
+	}
+
+	if (argv2)
+	{
+		for (_TCHAR** arg = argv2; *arg; arg++)
+			delete *arg;
+		delete argv2;
+	}
+
 	if (manager)
 	{
 		delete manager;

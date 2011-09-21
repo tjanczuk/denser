@@ -126,29 +126,27 @@ void WINAPI EventLoop::OnExecuteEvent(DWORD ctx)
 	EventContext* ec = (EventContext*)ctx;
 
 	EventLoop* loop = ec->loop;
-	
+
+	v8::Isolate::Scope is(loop->denser->isolate);
+	v8::Context::Scope cs(loop->denser->context);
+	v8::HandleScope hs;
+
 	if (loop->lastEventResult == S_OK && !loop->shutdownMode)
 	{
 		// This check was to avoid executing further events after an event execution failed. This can occur as a result of 
 		// a scheduling race condition between queued up APCs and resuming the wait in RunLoop. The condition is short lived
 		// as we expect the RunLoop to exit as soon as it is signalled. 
 
-		v8::Isolate::Scope is(loop->denser->isolate);
 		loop->denser->meter->StartThreadTimeMeter();		
 		loop->lastEventResult = ec->ev->Execute(loop->denser->context);
 		loop->denser->meter->StopThreadTimeMeter();
 	}
 	else if (!ec->ev->ignorable)
 	{
-		v8::Isolate::Scope is(loop->denser->isolate);
 		ec->ev->Execute(loop->denser->context);
 	}
-
-	{
-		v8::Isolate::Scope is(loop->denser->isolate);
-		v8::Context::Scope cs(loop->denser->context);
-		delete ec->ev;
-	}
+	
+	delete ec->ev;
 	delete ec;	
 
 	InterlockedDecrement(&loop->pendingEventCount);
