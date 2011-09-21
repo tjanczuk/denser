@@ -85,7 +85,7 @@ Error:
 
 HRESULT SetULONG64Property(v8::Handle<v8::Object> var, PCWSTR propertyName, ULONG64 value)
 {
-	ErrorIf(!var->Set(v8::String::New((uint16_t*)propertyName), v8::Number::New(*(double*)&value)));
+	ErrorIf(!var->Set(v8::String::New((uint16_t*)propertyName), v8::Number::New((double)value)));
 
 	return S_OK;
 Error:
