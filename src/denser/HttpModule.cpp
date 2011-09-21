@@ -19,6 +19,7 @@ HttpRequestBodyChunkEvent::HttpRequestBodyChunkEvent(HTTP_IO_CONTEXT* ctx, DWORD
 	if (this->size == 0 && ctx->buffer != NULL)
 	{
 		free(ctx->buffer);		
+		this->chunk = NULL;
 	}
 	ctx->buffer = NULL; // ownership of the buffer is taken
 }

@@ -90,4 +90,4 @@ public:
 	DENSER_FROM_VAR(args, denser);\
 	v8::Isolate::Scope is(denser->isolate);\
 	v8::Context::Scope cs(denser->context);\
-	
+	v8::HandleScope hs;

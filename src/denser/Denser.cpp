@@ -728,17 +728,20 @@ HRESULT Denser::InitiateShutdown()
 {
 	ENTER_CS(this->syncRoot)
 
-	// turn off HTTP
-	if (this->httpManager != NULL)
+	if (this->initialized)
 	{
-		this->httpManager->EnterShutdownMode();
-	}
+		// turn off HTTP
+		if (this->httpManager != NULL)
+		{
+			this->httpManager->EnterShutdownMode();
+		}
 
-	// From now on, stop running JavaScript callbacks, but continue running the loop to drain the APC queue
-	// EventLoop::RunLoop will exit once APCs have been drained. 
-	if (this->loop)
-	{
-		this->loop->EnterShutdownMode(); 
+		// From now on, stop running JavaScript callbacks, but continue running the loop to drain the APC queue
+		// EventLoop::RunLoop will exit once APCs have been drained. 
+		if (this->loop)
+		{
+			this->loop->EnterShutdownMode(); 
+		}
 	}
 
 	LEAVE_CS(this->syncRoot)
