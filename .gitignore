@@ -1,0 +1,15 @@
+build/
+
+Debug/
+
+Release/
+
+ipch
+tmp
+obj/
+bin/
+*.suo
+*.user
+*dlldata.c
+*.sdf
+*.opensdf

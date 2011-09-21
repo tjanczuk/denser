@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="Denser.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="DenserManager.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="EventLoop.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpManager.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpModule.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="LogModule.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="MeterModule.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Denser.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="EventLoop.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="HttpModule.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MeterModule.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="HttpManager.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="DenserManager.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="LogModule.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="modules\tracing.js">
+      <Filter>Modules</Filter>
+    </None>
+    <None Include="modules\scheduler.js">
+      <Filter>Modules</Filter>
+    </None>
+    <None Include="modules\sqlserver.js">
+      <Filter>Modules</Filter>
+    </None>
+    <None Include="modules\http.js">
+      <Filter>Modules</Filter>
+    </None>
+    <None Include="modules\meter.js">
+      <Filter>Modules</Filter>
+    </None>
+    <None Include="samples\tracing.101.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\tracing.102.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\tracing.103.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\scheduler.101.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\scheduler.102.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\scheduler.103.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\http.101.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\http.102.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\http.201.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\http.202.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\chat.ui.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\chat.htm">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\dante.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\chat2.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\meter.102.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\meter.101.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="modules\manager.js">
+      <Filter>Modules</Filter>
+    </None>
+    <None Include="samples\chat.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\config.100.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\config.anonymousadmin.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="samples\config.authenticatedadmin.js">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="modules\DenserHelpPage.htm">
+      <Filter>Modules</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{2327904b-c3ac-453f-a3bf-e2a378acc9f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code">
+      <UniqueIdentifier>{7b2775e1-9252-4b6d-9a1b-fd7ff210de64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{21c560a6-b86f-4830-bb5b-f2a45247ac84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="samples">
+      <UniqueIdentifier>{82c5cc17-34e9-4973-8f80-9c6c93b0cec7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="modules.rc">
+      <Filter>Modules</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

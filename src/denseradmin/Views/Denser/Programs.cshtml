@@ -1,0 +1,213 @@
+﻿@model denseradmin.Models.ProgramsModel
+@{
+    ViewBag.Title = "Denser - Programs";
+}
+
+@if(false) { <script src="/Scripts/jquery-1.4.4-vsdoc.js" language="javascript" /> }
+                                                                                   
+<script type="text/javascript">
+    var denserServer = '@Model.PublicEndpoint';
+    var lastStatusUpdateId;
+    var lastStatsUpdateId;
+    var communicationErrorCount = 0;
+    var maxCommunicationError = 10;
+    var updateDelay = 1000;
+    var programCount;
+
+    function adjustUpdateDelay() {
+        updateDelay = 5000 / programCount;
+    }
+
+    function addRow(id) {
+        lastStatusUpdateId = lastStatsUpdateId = id;
+        var rowHtml = '<tr id="' + id + '"><td>' + id + '</td>' +
+            '<td class="status node-table-data">&nbsp;</td>' +
+            '<td class="exitCode node-table-data">&nbsp;</td>' +
+            '<td class="cpuCycles node-table-data">&nbsp;</td>' +
+            '<td class="incoming node-table-data">&nbsp;</td>' +
+            '<td class="outgoing node-table-data">&nbsp;</td>' +
+            '<td class="completed node-table-data">&nbsp;</td>' +
+            '<td class="aborted node-table-data">&nbsp;</td>' +
+            '<td class="active node-table-data">&nbsp;</td>' +
+            '<td><a href="' + denserServer + 'programs/' + id + '/log?format=text">logs</a></td>' + // log
+            '<td><a href="' + denserServer + 'programs/' + id + '/code">code</a></td>' + // code
+            (id === "00000000-0000-0000-0000-000000000000" ? '<td>&nbsp</td>' : 
+            '<td><a id="kill-' + id + '" href="#">stop</a></td>') + // kill
+            '</tr>';
+        $("#programsTable").append(rowHtml);
+        $('#kill-' + id).click(function () {
+            var id = $(this).parent().parent().attr('id');
+            var link = this;
+            $.ajax({
+                url: denserServer + 'programs/' + id,
+                type: 'DELETE',
+                success: function (d, t, x) {
+                    programCount--;
+                    adjustUpdateDelay();
+                    $(link).parent().html('&nbsp;');
+                },
+                error: function (x, s, e) {
+                    alert('Error stopping program ' + id + '. Error code: ' + x.status + ' ' + x.statusText);
+                }
+            });
+            return false;
+        });
+    }
+
+    function showCommunicationErrorMessage(x, s, e) {
+        var message = e || s;
+        if (!message || message === "error") message = x.status + ' ' + x.statusText;
+        $("#programsTable").remove();
+        $("#error").html(message);
+        $("#communicationError").show();
+    }
+
+    function fillTableOnce() {
+        $.ajax({
+            url: denserServer + 'programs',
+            success: function (data) {
+                for (var i in data) {
+                    addRow(data[i]);
+                }
+                programCount = data.length;
+                adjustUpdateDelay();
+                nextStatusUpdate();
+                nextStatsUpdate();
+            },
+            error: showCommunicationErrorMessage
+        });
+    }
+
+    function getNextId(id) {
+        return $('#' + lastStatsUpdateId).next().attr('id') || $('.lastHeaderRow').next().attr('id'); 
+    }
+
+    function nextStatusUpdate() {
+        $.ajax({
+            url: denserServer + 'programs/' + lastStatusUpdateId,
+            success: function (data) {
+                communicationErrorCount = 0;
+                $('#' + lastStatusUpdateId + ' .status').html(data.state);
+                if (typeof (data.result) !== "undefined") {
+                    $('#kill-' + lastStatusUpdateId).parent().html('&nbsp;');
+                    $('#' + lastStatusUpdateId + ' .exitCode').html(data.result);
+                }
+            },
+            error: function (x, s, e) {
+                if (++communicationErrorCount > maxCommunicationError) {
+                    showCommunicationErrorMessage(x, s, e);
+                }
+            },
+            complete: function () {
+                if (communicationErrorCount <= maxCommunicationError) {
+                    lastStatusUpdateId = getNextId(lastStatusUpdateId);
+                    setTimeout(nextStatusUpdate, updateDelay);
+                }
+            }
+        });
+    }
+
+    function nextStatsUpdate() {
+        $.ajax({
+            url: denserServer + 'programs/' + lastStatsUpdateId + '/stats',
+            success: function (data) {
+                communicationErrorCount = 0;
+                $('#' + lastStatsUpdateId + ' .cpuCycles').html(data.cpu.applicationCpuCycles);
+                $('#' + lastStatsUpdateId + ' .incoming').html(data.http.httpServerBytesReceived);
+                $('#' + lastStatsUpdateId + ' .outgoing').html(data.http.httpServerBytesSent);
+                $('#' + lastStatsUpdateId + ' .completed').html(data.http.httpServerRequestsCompleted);
+                $('#' + lastStatsUpdateId + ' .aborted').html(data.http.httpServerRequestsAborted);
+                $('#' + lastStatsUpdateId + ' .active').html(data.http.httpServerRequestsActive);
+                var tmp = lastStatsUpdateId;
+            },
+            error: function (x, s, e) {
+                if (++communicationErrorCount > maxCommunicationError) {
+                    showCommunicationErrorMessage(x, s, e);
+                }
+            },
+            complete: function () {
+                if (communicationErrorCount <= maxCommunicationError) {
+                    lastStatsUpdateId = getNextId(lastStatsUpdateId);
+                    setTimeout(nextStatsUpdate, updateDelay);
+                }
+            }
+        });
+    }
+
+    $(function () {
+        fillTableOnce();
+    });
+</script>
+<h2>
+    Programs</h2>
+<p>
+    The list below shows all running and terminated programs on this instance of the
+    Denser server.
+</p>
+<div id="communicationError" style="display:none">
+    <font color=red>An error occurred when communicating with the Denser server. Try refreshing the page.</font><br />
+    Error: <span id="error"></span>
+</div>
+<table id="programsTable">
+    <tr>
+        <th class="node-table-id-column">
+            &nbsp;
+        </th>
+        <th>
+            &nbsp;
+        </th>
+        <th>
+            &nbsp;
+        </th>
+        <th>
+            &nbsp;
+        </th>
+        <th colspan="2" class="node-table-header">
+            Traffic&nbsp;[bytes]
+        </th>
+        <th colspan="3" class="node-table-header">
+            HTTP&nbsp;requests&nbsp;[#]
+        </th>
+        <th colspan="3">
+            &nbsp;
+        </th>
+    </tr>
+    <tr class="lastHeaderRow">
+        <th>
+            Program&nbsp;ID
+        </th>
+        <th>
+            Status
+        </th>
+        <th>
+            Exit&nbsp;code
+        </th>
+        <th>
+            CPU&nbsp;cycles
+        </th>
+        <th>
+            Incoming
+        </th>
+        <th>
+            Outgoing
+        </th>
+        <th>
+            Completed
+        </th>
+        <th>
+            Aborted
+        </th>
+        <th>
+            Active
+        </th>
+        <th>
+            &nbsp;
+        </th>
+        <th>
+            &nbsp;
+        </th>
+        <th>
+            &nbsp;
+        </th>
+    </tr>
+</table>

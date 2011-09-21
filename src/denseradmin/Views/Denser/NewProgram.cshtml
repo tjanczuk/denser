@@ -1,0 +1,61 @@
+﻿@model denseradmin.Models.ProgramsModel
+@{
+    ViewBag.Title = "Denser - New Program";
+}
+@if (false)
+{ <script src="/Scripts/jquery-1.4.4-vsdoc.js" language="javascript" /> }
+<script type="text/javascript">
+    var denserServer = '@Model.PublicEndpoint';
+    var editor;
+
+    $(function () {
+        editor = ace.edit("editor");
+        editor.setTheme("ace/theme/clouds");
+        var JavaScriptMode = require("ace/mode/javascript").Mode;
+        editor.getSession().setMode(new JavaScriptMode());
+
+        $('input').click(function () {
+            var script = editor.getSession().getValue();
+            var count = $(this).attr('data-count');
+            for (var i = 0; i < count; i++) {
+                $.ajax({
+                    url: denserServer + 'programs/',
+                    contentType: 'application/javascript',
+                    data: script.toString(),
+                    type: 'POST',
+                    success: function (d, t, x) {
+                        if (count == 1) {
+                            alert('Program created. Check out the Programs tab to verify the result (new programs appear at the end of the list).');
+                        }
+                    },
+                    error: function (x, s, e) {
+                        if (count == 1) {
+                            alert('Program creation failed,');
+                        }
+                    }
+                });
+            }
+            if (count > 1) {
+                alert('Start operations initiated. Check out the Programs tab to verify the result (new programs appear at the end of the list).');
+            }
+        });
+    });
+</script>
+<style type="text/css" media="screen">
+    #editor
+    {
+        position:absolute;
+        top: 275px;
+        left: 5px;
+        right: 5px;
+        bottom:0px;
+    } 
+</style>
+<h2>
+    New program</h2>    
+    <input data-count="1" type="button" value="Start program"/>
+    <input data-count="5" type="button" value="Start 5 instances of the program"/>
+    <input data-count="10" type="button" value="Start 10 instances of the program"/>
+    <a href="http://tjanczuk-hp/denser/denser.pdf">Programming&nbsp;guide</a> <a href="http://tjanczuk-hp/denser/">Samples</a>
+<div id="editor">var tracing = require('tracing');
+tracing.write('Hello, world!');</div>

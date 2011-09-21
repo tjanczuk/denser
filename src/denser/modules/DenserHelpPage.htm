@@ -1,0 +1,298 @@
+<html>
+<head>
+    <title>Denser Managment Service</title>
+</head>
+<style type="text/css">
+    #content
+    {
+        font-size: 0.7em;
+        padding-bottom: 2em;
+        margin-left: 30px;
+    }
+    body
+    {
+        margin-top: 0px;
+        margin-left: 0px;
+        color: #000000;
+        font-family: Verdana;
+        background-color: white;
+    }
+    p
+    {
+        margin-top: 0px;
+        margin-bottom: 12px;
+        color: #000000;
+        font-family: Verdana;
+    }
+    pre
+    {
+        border-right: #f0f0e0 1px solid;
+        padding-right: 5px;
+        border-top: #f0f0e0 1px solid;
+        margin-top: -5px;
+        padding-left: 5px;
+        font-size: 1.2em;
+        padding-bottom: 5px;
+        border-left: #f0f0e0 1px solid;
+        padding-top: 5px;
+        border-bottom: #f0f0e0 1px solid;
+        font-family: Courier New;
+        background-color: #e5e5cc;
+    }
+    .heading1
+    {
+        margin-top: 0px;
+        padding-left: 15px;
+        font-weight: normal;
+        font-size: 26px;
+        margin-bottom: 0px;
+        padding-bottom: 3px;
+        margin-left: -30px;
+        width: 100%;
+        color: #ffffff;
+        padding-top: 10px;
+        font-family: Tahoma;
+        background-color: #003366;
+    }
+    .intro
+    {
+        margin-left: -15px;
+    }
+</style>
+<body>
+    <div id="content">
+        <p class="heading1">
+            Denser Management Service</p>
+        <br />
+        <p class="intro">
+            Welcome to the Denser Management Service.</p>
+        <p class="intro">
+            You can start, terminate, and interrogate server side JavaScript programs managed
+            by this instance of the Denser server using a collection of HTTP APIs documented
+            below.
+        </p>
+        <p class="intro" style="display: ##anonymous##">
+            <font color="red">This instance of Denser Management Service allows calls from anonymous
+                clients.</font>
+        </p>
+        <p class="intro" style="display: ##authenticated##">
+            <font color="red">This instance of the Denser Management Service requires all calls
+                to be authenticated.</font> Callers can authenticate by adding the Authorization
+            HTTP request header with the value that is a literal match of the authorizationKey
+            parameter specified in the configuration of this Denser server instance.
+        </p>
+        <p class="intro">
+            <b>GET ##ROOT##/programs/</b></p>
+        <p>
+            Get the list of programs managed by the Denser server instance. The result is a
+            JSON array with a list of GUID program identifiers. The list contains programs that
+            are still running as well as those that have already terminated.</p>
+        <div style="display: ##anonymous##">
+            <p>
+                <a href="##ROOT##/programs/">Try it now!</a></p>
+        </div>
+        <p>
+            Sample request:</p>
+        <pre>GET http://tjanczuk-e6400/denser/programs/ HTTP/1.1
+User-Agent: Fiddler
+Host: tjanczuk-e6400</pre>
+        <p>
+            Sample response:</p>
+        <pre>HTTP/1.1 200 OK
+Cache-Control: no-cache
+Content-Length: 3940
+Content-Type: application/json
+Server: Denser/v0.2 Microsoft-HTTPAPI/2.0
+Date: Mon, 23 May 2011 07:03:31 GMT
+
+["00000000-0000-0000-0000-000000000000","4B336297-FEC4-44F2-BE07-0271CD159FE1","81B8EF69-49B2-42A1-B98A-80AF1CA3302E"]</pre>
+        <p class="intro">
+            <b>GET ##ROOT##/programs/{programId}</b></p>
+        <p>
+            Get the status of the program identified with the programId GUID. The result is
+            a JSON object that indicates the status of the program (running or finished). For
+            finished programs, the result code is also provided (zero means successful completion).</p>
+        <div style="display: ##anonymous##">
+            <p>
+                <a href="##ROOT##/programs/00000000-0000-0000-0000-000000000000/" style="display: ##anonymous##">
+                    Try it now!</a></p>
+        </div>
+        <p>
+            Sample request:</p>
+        <pre>GET http://tjanczuk-e6400/denser/programs/4B336297-FEC4-44F2-BE07-0271CD159FE1/ HTTP/1.1
+User-Agent: Fiddler
+Host: tjanczuk-e6400</pre>
+        <p>
+            Sample response:</p>
+        <pre>HTTP/1.1 200 OK
+Cache-Control: no-cache
+Content-Length: 19
+Content-Type: application/json
+Server: Denser/v0.2 Microsoft-HTTPAPI/2.0
+Date: Mon, 23 May 2011 07:08:41 GMT
+
+{"state":"running"}</pre>
+        <p class="intro">
+            <b>GET ##ROOT##/programs/{programId}/code/</b></p>
+        <p>
+            Get the JavaScript source code of the program identified with the programId GUID.
+            The result is the JavaScript source code of the program.</p>
+        <div style="display: ##anonymous##">
+            <p>
+                <a href="##ROOT##/programs/00000000-0000-0000-0000-000000000000/code/" style="display: ##anonymous##">
+                    Try it now!</a></p>
+        </div>
+        <p>
+            Sample request:</p>
+        <pre>GET http://tjanczuk-e6400/denser/programs/252FE948-BFE2-480F-A55F-5CA3F9AE7288/code HTTP/1.1
+User-Agent: Fiddler
+Host: tjanczuk-e6400</pre>
+        <p>
+            Sample response:</p>
+        <pre>HTTP/1.1 200 OK
+Cache-Control: no-cache
+Content-Length: 42
+Content-Type: text/plain
+Server: Denser/v0.2 Microsoft-HTTPAPI/2.0
+Date: Mon, 23 May 2011 07:15:56 GMT
+
+require("tracing").write("Hello, world!");</pre>
+        <p class="intro">
+            <b>GET ##ROOT##/programs/{programId}/stats/</b></p>
+        <p>
+            Get the server resource usage statistics of the program identified with the programId
+            GUID. The result is a JSON object with the current metrics of resource consumption.
+            For programs that have completed, this represents the total resource consumption
+            throghout their lifetime.</p>
+        <div style="display: ##anonymous##">
+            <p>
+                <a href="##ROOT##/programs/00000000-0000-0000-0000-000000000000/stats/" style="display: ##anonymous##">
+                    Try it now!</a></p>
+        </div>
+        <p>
+            Sample request:</p>
+        <pre>GET http://tjanczuk-e6400/denser/programs/252FE948-BFE2-480F-A55F-5CA3F9AE7288/stats HTTP/1.1
+User-Agent: Fiddler
+Host: tjanczuk-e6400</pre>
+        <p>
+            Sample response:</p>
+        <pre>HTTP/1.1 200 OK
+Cache-Control: no-cache
+Content-Length: 270
+Content-Type: application/json
+Server: Denser/v0.2 Microsoft-HTTPAPI/2.0
+Date: Mon, 23 May 2011 07:17:38 GMT
+
+{"programId":"252FE948-BFE2-480F-A55F-5CA3F9AE7288",
+ "cpu":{"applicationCpuCycles":9368384,
+        "threadCpuCycles":23934740},
+ "http":{"httpServerRequestsCompleted":0,
+         "httpServerRequestsAborted":0,
+         "httpServerRequestsActive":0,
+         "httpServerBytesReceived":0,
+         "httpServerBytesSent":0}}</pre>
+        <p class="intro">
+            <b>GET ##ROOT##/programs/{programId}/log/</b></p>
+        <p>
+            Get the trace log of the program identified with the programId GUID. The result
+            is a JSON array with a server-side configured number of the most recent trace entires.
+            Each entry is a JSON object containing the timestamp and the entry content.</p>
+        <div style="display: ##anonymous##">
+            <p>
+                <a href="##ROOT##/programs/00000000-0000-0000-0000-000000000000/log/" style="display: ##anonymous##">
+                    Try it now!</a></p>
+        </div>
+        <p>
+            Sample request:</p>
+        <pre>GET http://tjanczuk-e6400/denser/programs/252FE948-BFE2-480F-A55F-5CA3F9AE7288/log HTTP/1.1
+User-Agent: Fiddler
+Host: tjanczuk-e6400</pre>
+        <p>
+            Sample response:</p>
+        <pre>HTTP/1.1 200 OK
+Cache-Control: no-cache
+Content-Length: 88
+Content-Type: application/json
+Server: Denser/v0.2 Microsoft-HTTPAPI/2.0
+Date: Mon, 23 May 2011 07:21:53 GMT
+
+[{"time":{"y":2011,"m":5,"d":23,"h":7,"mi":13,"s":41,"ms":436},"entry":"Hello, world!"}]</pre>
+        <p class="intro">
+            <b>GET ##ROOT##/programs/{programId}/log?format=text</b></p>
+        <p>
+            The same as above, just in a more human-readable text format.</p>
+        <div style="display: ##anonymous##">
+            <p>
+                <a href="##ROOT##/programs/00000000-0000-0000-0000-000000000000/log?format=text"
+                    style="display: ##anonymous##">Try it now!</a></p>
+        </div>
+        <p>
+            Sample request:</p>
+        <pre>GET http://tjanczuk-e6400/denser/programs/252FE948-BFE2-480F-A55F-5CA3F9AE7288/log?format=text HTTP/1.1
+User-Agent: Fiddler
+Host: tjanczuk-e6400</pre>
+        <p>
+            Sample response:</p>
+        <pre>HTTP/1.1 200 OK
+Cache-Control: no-cache
+Content-Length: 61
+Content-Type: text/plain
+Server: Denser/v0.2 Microsoft-HTTPAPI/2.0
+Date: Mon, 23 May 2011 07:19:56 GMT
+
+>>>>>>>>>> Thu, 23 Jun 2011 07:13:41 UTC 436ms
+Hello, world!</pre>
+        <p class="intro">
+            <b>POST ##ROOT##/programs/</b></p>
+        <p>
+            Starts a new program on the server. The code of the program must be included in
+            the body of the request.
+        </p>
+        <p>
+            If the request content type is application/javascript, the entire content of the
+            body is treated literally as the code of the JavaScript program to run.
+        </p>
+        <p>
+            If the request content type is application/json, the body of the request must contain
+            a JSON object that specifies the literal content of the program to run in the 'code'
+            property. This format is supported to allow for supporting additional caller-specified
+            parameters in the future.
+        </p>
+        <p>
+            Sample request:</p>
+        <pre>POST http://tjanczuk-e6400/denser/programs HTTP/1.1
+User-Agent: Fiddler
+Host: tjanczuk-e6400
+Content-Type: application/javascript
+Content-Length: 42
+
+require("tracing").write("Hello, world!");</pre>
+        <p>
+            Sample response:</p>
+        <pre>HTTP/1.1 201 Created
+Content-Length: 0
+Location: 252FE948-BFE2-480F-A55F-5CA3F9AE7288
+Server: Denser/v0.2 Microsoft-HTTPAPI/2.0
+Date: Mon, 23 May 2011 07:13:41 GMT</pre>
+        <p class="intro">
+            <b>DELETE ##ROOT##/programs/{programId}</b></p>
+        <p>
+            Initiates shutdown of the program identified by the programId GUID. After the
+            shutdown has completed, the program can still be interrogated using the program-scope
+            GET APIs described above.
+        </p>
+        <p>
+            Sample request:</p>
+        <pre>DELETE http://tjanczuk-e6400/denser/programs/252FE948-BFE2-480F-A55F-5CA3F9AE7288 HTTP/1.1
+User-Agent: Fiddler
+Host: tjanczuk-e6400</pre>
+        <p>
+            Sample response:</p>
+        <pre>HTTP/1.1 204 No Content
+Cache-Control: no-cache
+Content-Length: 0
+Server: Denser/v0.2 Microsoft-HTTPAPI/2.0
+Date: Mon, 23 May 2011 07:23:16 GMT</pre>
+    </div>
+</body>
+</html>
