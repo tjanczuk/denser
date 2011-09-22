@@ -10,8 +10,8 @@ PCWSTR MeterModule::metricName[] = {
 	L"httpServerBytesSent" // HTTP_SERVER_BYTES_SENT,
 };
 
-MeterModule::MeterModule(v8::Handle<v8::Context> context, GUID programId) 
-	: threadCycleTime(0), startThreadCycleTime(0), context(v8::Persistent<v8::Context>::New(context)), programId(programId), thread(NULL)
+MeterModule::MeterModule(Denser* denser) 
+	: threadCycleTime(0), startThreadCycleTime(0), denser(denser), thread(NULL)
 {
 	RtlZeroMemory(this->metric, sizeof(ULONG64) * METRIC_SIZE);
 	HANDLE process = GetCurrentProcess();
@@ -28,16 +28,11 @@ MeterModule::~MeterModule()
 
 void MeterModule::ReleaseResources()
 {
-	if (!this->context.IsEmpty())
-	{
-		this->context.Dispose();
-		this->context = v8::Persistent<v8::Context>();
-	}
 }
 
 HRESULT MeterModule::GetUsage(v8::Handle<v8::Object>& stats)
 {
-	return this->GetUsage(this->context, true, stats);
+	return this->GetUsage(this->denser->context, true, stats);
 }
 
 HRESULT MeterModule::GetUsage(v8::Handle<v8::Context> context, bool getInProgressStats, v8::Handle<v8::Object>& stats)
@@ -58,7 +53,7 @@ HRESULT MeterModule::GetUsage(v8::Handle<v8::Context> context, bool getInProgres
 	ErrorIf(cpu.IsEmpty());
 	ErrorIf(http.IsEmpty());
 	ErrorIf(memory.IsEmpty());
-	ErrorIf(S_OK != ::SetGUIDProperty(result, L"programId", this->programId));
+	ErrorIf(S_OK != ::SetGUIDProperty(result, L"programId", this->denser->programId));
 	ErrorIf(S_OK != ::SetVarProperty(result, L"cpu", cpu));
 	ErrorIf(S_OK != ::SetVarProperty(result, L"http", http));	
 	ErrorIf(S_OK != ::SetVarProperty(result, L"memory", memory));	
@@ -78,9 +73,12 @@ HRESULT MeterModule::GetUsage(v8::Handle<v8::Context> context, bool getInProgres
 
 	// Add memory statistics
 
-	ErrorIf(S_OK != ::SetIntProperty(memory, L"usedHeapSize", heap.used_heap_size()));
-	ErrorIf(S_OK != ::SetIntProperty(memory, L"totalHeapSize", heap.total_heap_size()));
-	ErrorIf(S_OK != ::SetIntProperty(memory, L"totalHeapSizeExecutable", heap.total_heap_size_executable()));	
+	if (!this->denser->useContextIsolation)
+	{
+		ErrorIf(S_OK != ::SetIntProperty(memory, L"usedHeapSize", heap.used_heap_size()));
+		ErrorIf(S_OK != ::SetIntProperty(memory, L"totalHeapSize", heap.total_heap_size()));
+		ErrorIf(S_OK != ::SetIntProperty(memory, L"totalHeapSizeExecutable", heap.total_heap_size_executable()));	
+	}
 
 	stats = handleScope.Close(result);
 

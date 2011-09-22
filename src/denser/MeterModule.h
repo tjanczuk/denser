@@ -14,14 +14,13 @@ typedef enum {
 class MeterModule {
 private:
 	ULONG64 threadCycleTime, startThreadCycleTime;	
-	v8::Persistent<v8::Context> context;
 	ULONG64 metric[METRIC_SIZE];
 	static PCWSTR metricName[];
-	GUID programId;
 	HANDLE thread;
+	Denser* denser;
 
 public:
-	MeterModule(v8::Handle<v8::Context> context, GUID programId); 
+	MeterModule(Denser* denser); 
 	~MeterModule();
 
 	HRESULT GetUsage(v8::Handle<v8::Object>& stats);

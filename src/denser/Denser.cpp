@@ -95,7 +95,7 @@ HRESULT Denser::InitializeRuntime()
 
 	// TODO, tjanczuk, the max number of log entires be configurable
 	this->log = new LogModule(MAX_LOG_ENTRIES);
-	this->meter = new MeterModule(this->context, this->programId);
+	this->meter = new MeterModule(this);
 	if (!this->useContextIsolation)
 	{
 		// TODO, tjanczuk, the max event loop length should be configurable
