@@ -149,6 +149,9 @@
     <None Include="modules\DenserHelpPage.htm">
       <Filter>Modules</Filter>
     </None>
+    <None Include="samples\genconfig.bat">
+      <Filter>samples</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">

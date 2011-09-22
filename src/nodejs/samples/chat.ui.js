@@ -124,17 +124,6 @@
             <td class="chat-table-column">
                 <h2>
                     Denser Web Chat</h2>
-                <p>
-                    This application is built using the <a href="http://tjanczuk-hp/denser/denser.pdf">Denser prototype</a>.</p>
-                <p>
-                    Denser is a Win32, server side JavaScript host based on V8 engine and HTTP.SYS.
-                    Denser is an incubation effort in the AppFabric team with the goal of lowering the
-                    cost of running cloud applications by enabling high application density. Read more
-                    about Denser <a href="http://tjanczuk-hp/denser/denser.pdf">here</a>. Get the Denser
-                    binaries and samples <a href="http://tjanczuk-hp/denser/">here</a>. View source
-                    code of the web chat server <a href="http://tjanczuk-hp/denser/chat.js">here</a>.
-                    Contact <a href="mailto:tjanczuk@microsoft.com">tjanczuk</a> with any questions.</p>
-                <p>
                     Type a message and press enter to send:</p>
                 <textarea id="message" maxrows="3" style="width: 100%; resize: none"></textarea>
                 <p>
@@ -144,7 +133,7 @@
             </td>
             <td class="chat-table-column">
                 <h2>
-                    Server Resource Consumption</h2>
+                    Program Resource Consumption</h2>
                 <div id="stats">
                 </div>
             </td>

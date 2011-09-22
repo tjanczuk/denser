@@ -64,6 +64,7 @@
     <PostBuildEvent>
       <Message>Copy V8 to output directory</Message>
       <Command>copy /y $(SolutionDir)\denser\samples\*.js $(SolutionDir)..\build\$(Configuration)
+copy /y $(SolutionDir)\denser\samples\genconfig.bat $(SolutionDir)..\build\$(Configuration)
 copy /y $(SolutionDir)..\lib\v8\v8.dll $(SolutionDir)..\build\$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -87,6 +88,7 @@ copy /y $(SolutionDir)..\lib\v8\v8.dll $(SolutionDir)..\build\$(Configuration)</
     <PostBuildEvent>
       <Message>Copy V8 to output directory</Message>
       <Command>copy /y $(SolutionDir)\denser\samples\*.js $(SolutionDir)..\build\$(Configuration)
+copy /y $(SolutionDir)\denser\samples\genconfig.bat $(SolutionDir)..\build\$(Configuration)
 copy /y $(SolutionDir)..\lib\v8\v8.dll $(SolutionDir)..\build\$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -110,6 +112,7 @@ copy /y $(SolutionDir)..\lib\v8\v8.dll $(SolutionDir)..\build\$(Configuration)</
     <None Include="samples\config.anonymousadmin.js" />
     <None Include="samples\config.authenticatedadmin.js" />
     <None Include="samples\dante.js" />
+    <None Include="samples\genconfig.bat" />
     <None Include="samples\http.101.js" />
     <None Include="samples\http.102.js" />
     <None Include="samples\http.201.js" />
