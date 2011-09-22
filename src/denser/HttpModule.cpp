@@ -521,7 +521,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 				ctx->state = ProcessingRequestHeaders;
 
 				// HttpRequestHeadersEvent takes ownership of the buffer
-				ctx->denser->loop->PostEvent((Event*)new HttpRequestHeadersEvent(ctx));
+				ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpRequestHeadersEvent(ctx));
 			}
 			else if (ctx->state == ReadingRequestBody)
 			{
@@ -532,7 +532,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 				ctx->state = ProcessingRequestBody;
 
 				// HttpRequestBodyChunkEvent takes ownership of the buffer
-				ctx->denser->loop->PostEvent((Event*)new HttpRequestBodyChunkEvent(ctx, bytesRead));
+				ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpRequestBodyChunkEvent(ctx, bytesRead));
 			}
 			else if (ctx->state == ProcessingRequestHeaders || ctx->state == ProcessingRequestBody)
 			{
@@ -546,7 +546,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 					// end of request has been reached, dispatch event to JS to that effect, then move on to waiting on next IO completion
 
 					// HttpRequestBodyChunkEvent does not take ownership of the buffer
-					ctx->denser->loop->PostEvent((Event*)new HttpStateTransitionEvent(ctx, S_OK));
+					ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpStateTransitionEvent(ctx, S_OK));
 				}
 				else if (ctx->state == Failed)
 				{
@@ -556,7 +556,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 					// Failure reading request body. Notify JS about arror and issue a new HTTP request.
 
 					// ownership of the buffer remains with ctx
-					ctx->denser->loop->PostEvent((Event*)new HttpStateTransitionEvent(ctx, E_FAIL));
+					ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpStateTransitionEvent(ctx, E_FAIL));
 
 					this->InitializeAsyncReceive(ctx, NULL);
 					if (ctx->state == Failed)
@@ -582,7 +582,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 					ctx->denser->meter->IncrementMetric(HTTP_SERVER_REQUESTS_ABORTED);					
 
 					// ownership of the buffer remains with ctx
-					ctx->denser->loop->PostEvent((Event*)new HttpStateTransitionEvent(ctx, E_FAIL));
+					ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpStateTransitionEvent(ctx, E_FAIL));
 
 					ALLOC_BUFFER_OR_DIE(INITIAL_HTTP_HEADER_BUFFER_SIZE)
 
@@ -610,7 +610,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 					ctx->denser->meter->IncrementMetric(HTTP_SERVER_REQUESTS_ABORTED);					
 
 					// ownership of the buffer remains with ctx
-					ctx->denser->loop->PostEvent((Event*)new HttpStateTransitionEvent(ctx, E_FAIL));
+					ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpStateTransitionEvent(ctx, E_FAIL));
 
 					ALLOC_BUFFER_OR_DIE(INITIAL_HTTP_HEADER_BUFFER_SIZE)
 
@@ -647,7 +647,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 					// there is no response body, we are done with the HTTP request/response; initiate a new HTTP request read using this slot
 
 					ctx->state = Completed;
-					ctx->denser->loop->PostEvent((Event*)new HttpStateTransitionEvent(ctx, S_OK));
+					ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpStateTransitionEvent(ctx, S_OK));
 
 					ALLOC_BUFFER_OR_DIE(INITIAL_HTTP_HEADER_BUFFER_SIZE)
 
@@ -667,7 +667,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 					ctx->state = WaitingForResponseBody;
 					
 					// HttpStateTransitionEvent does not take ownership of the buffer
-					ctx->denser->loop->PostEvent((Event*)new HttpStateTransitionEvent(ctx, S_OK));
+					ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpStateTransitionEvent(ctx, S_OK));
 				}
 			}
 			else if (ctx->state == PendingAbort)
@@ -682,7 +682,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 
 				// HttpStateTransitionEvent does not take ownership of the buffer
 				ctx->state = Aborted;
-				ctx->denser->loop->PostEvent((Event*)new HttpStateTransitionEvent(ctx, ctx->error));
+				ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpStateTransitionEvent(ctx, ctx->error));
 
 				ALLOC_BUFFER_OR_DIE(INITIAL_HTTP_HEADER_BUFFER_SIZE)
 
@@ -779,7 +779,7 @@ unsigned int WINAPI HttpListener::ServerImpl()
 
 				// ownership of the buffer remains with ctx
 				ctx->state = Failed;
-				ctx->denser->loop->PostEvent((Event*)new HttpStateTransitionEvent(ctx, error));
+				ctx->denser->loop->PostEvent(ctx->denser, (Event*)new HttpStateTransitionEvent(ctx, error));
 			}
 
 			// Attempt to issue a new read request read to replace the failed one. 

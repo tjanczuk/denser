@@ -63,16 +63,25 @@ Error:
 	return E_FAIL;
 }
 
-EventLoop::EventLoop(LONG maxPendingEvents, Denser* denser)
-	: maxPendingEvents(maxPendingEvents), eventSourceCount(0), 
-	pendingEventCount(0), denser(denser), shutdownMode(FALSE), pendingDelayedEvents(NULL)
+EventLoop::EventLoop(LONG maxPendingEvents)
+	: maxPendingEvents(maxPendingEvents), eventSourceCount(0), denserCount(0),
+	pendingEventCount(0), shutdownMode(FALSE), pendingDelayedEvents(NULL) 
 {
 	// Store the current thread handle (assumed to be the same as the apartment thread of the associated script context)
 	// for the purpose of scheduling APCs for that thread in PostEvent.
 	HANDLE process = GetCurrentProcess();
 	DuplicateHandle(process, GetCurrentThread(), process, &this->threadHandle, 0, FALSE, DUPLICATE_SAME_ACCESS);
 	this->signalEvent = CreateEvent(NULL, false, false, NULL);
-	this->lastEventResult = !denser->context.IsEmpty() ? S_OK : E_FAIL;
+}
+
+void EventLoop::DenserAdded()
+{
+	InterlockedIncrement(&this->denserCount);
+}
+
+void EventLoop::DenserRemoved()
+{
+	InterlockedDecrement(&this->denserCount);
 }
 
 EventLoop::~EventLoop()
@@ -110,14 +119,14 @@ void APIENTRY EventLoop::OnExecuteDelayedEvent(LPVOID ctx, DWORD dwTimerLowValue
 	}
 	else
 	{
-		ec->loop->pendingDelayedEvents = ec->next;
+		ec->denser->loop->pendingDelayedEvents = ec->next;
 	}
 	if (ec->next != NULL)
 	{
 		ec->next->previous = ec->previous;
 	}
 	
-	InterlockedIncrement(&ec->loop->pendingEventCount);
+	InterlockedIncrement(&ec->denser->loop->pendingEventCount);
 	EventLoop::OnExecuteEvent((DWORD)ctx);
 }
 
@@ -125,33 +134,34 @@ void WINAPI EventLoop::OnExecuteEvent(DWORD ctx)
 {
 	EventContext* ec = (EventContext*)ctx;
 
-	EventLoop* loop = ec->loop;
+	Denser* denser = ec->denser;
 
-	v8::Isolate::Scope is(loop->denser->isolate);
-	v8::Context::Scope cs(loop->denser->context);
+	v8::Isolate::Scope is(denser->isolate);
+	v8::Context::Scope cs(denser->context);
 	v8::HandleScope hs;
 
-	if (loop->lastEventResult == S_OK && !loop->shutdownMode)
+	if (denser->result == S_OK && !denser->loop->shutdownMode)
 	{
 		// This check was to avoid executing further events after an event execution failed. This can occur as a result of 
 		// a scheduling race condition between queued up APCs and resuming the wait in RunLoop. The condition is short lived
 		// as we expect the RunLoop to exit as soon as it is signalled. 
 
-		loop->denser->meter->StartThreadTimeMeter();		
-		loop->lastEventResult = ec->ev->Execute(loop->denser->context);
-		loop->denser->meter->StopThreadTimeMeter();
+		denser->meter->StartThreadTimeMeter();		
+		HRESULT result = ec->ev->Execute(denser->context);
+		denser->SetLastResult(result);
+		denser->meter->StopThreadTimeMeter();
 	}
 	else if (!ec->ev->ignorable)
 	{
-		ec->ev->Execute(loop->denser->context);
+		ec->ev->Execute(denser->context);
 	}
 	
 	delete ec->ev;
 	delete ec;	
 
-	InterlockedDecrement(&loop->pendingEventCount);
+	InterlockedDecrement(&denser->loop->pendingEventCount);
 
-	loop->StopLoopIfNeeded();
+	denser->loop->StopLoopIfNeeded();
 }
 
 void EventLoop::StopLoopIfNeeded()
@@ -164,14 +174,14 @@ void EventLoop::StopLoopIfNeeded()
 	}
 }
 
-HRESULT EventLoop::PostEvent(Event *ev)
+HRESULT EventLoop::PostEvent(Denser* denser, Event *ev)
 {
 	EventContext* ec = NULL;
 	bool increasedPendingCount = false;
 
-	ErrorIf(this->lastEventResult != S_OK);
+	ErrorIf(denser->result != S_OK);
 	ErrorIf(ev == NULL);
-	ec = new EventContext(ev, this);
+	ec = new EventContext(ev, denser);
 	increasedPendingCount = true;
 	ErrorIf(InterlockedIncrement(&this->pendingEventCount) > this->maxPendingEvents);
 	ErrorIf(0 == QueueUserAPC(EventLoop::OnExecuteEvent, this->threadHandle, (ULONG_PTR)ec));
@@ -189,14 +199,14 @@ Error:
 	return E_FAIL;
 }
 
-HRESULT EventLoop::PostEvent(Event *ev, LONG delayInMilliseconds)
+HRESULT EventLoop::PostEvent(Denser* denser, Event *ev, LONG delayInMilliseconds)
 {
 	EventContext* ec = NULL;
 	LARGE_INTEGER dueTime;
 
-	ErrorIf(this->lastEventResult != S_OK);
+	ErrorIf(denser->result != S_OK);
 	ErrorIf(ev == NULL);
-	ec = new EventContext(ev, this);
+	ec = new EventContext(ev, denser);
 	dueTime.QuadPart = -(LONGLONG)delayInMilliseconds * 10000;	
 	ErrorIf(NULL == (ec->timer = CreateWaitableTimer(NULL, FALSE, NULL)));	
 	ErrorIf(false == SetWaitableTimer(ec->timer, &dueTime, 0, EventLoop::OnExecuteDelayedEvent, ec, FALSE));
@@ -251,6 +261,9 @@ HRESULT EventLoop::RunLoop()
 	// Cancel and clean up delayed events that have not been activated yet
 	while (this->pendingDelayedEvents != NULL)
 	{
+		v8::Isolate::Scope is(this->pendingDelayedEvents->denser->isolate);
+		v8::Context::Scope cs(this->pendingDelayedEvents->denser->context);
+
 		CloseHandle(this->pendingDelayedEvents->timer);
 		delete this->pendingDelayedEvents->ev;
 		EventContext *current = this->pendingDelayedEvents;
@@ -258,7 +271,7 @@ HRESULT EventLoop::RunLoop()
 		delete current;
 	}
 
-	return this->lastEventResult;
+	return S_OK;
 }
 
 BOOL EventLoop::ContinueRunning()
@@ -269,7 +282,7 @@ BOOL EventLoop::ContinueRunning()
 	// -- there are active event sources that may generate events (e.g. HTTP is listening for messages)
 	// -- there are delayed events scheduled for the future 
 
-	return this->lastEventResult == S_OK && 
+	return this->denserCount > 0 && 
 		(this->pendingEventCount > 0 || 
 			(!this->shutdownMode && (this->eventSourceCount > 0 || this->pendingDelayedEvents != NULL)));
 }

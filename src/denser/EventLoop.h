@@ -39,18 +39,18 @@ private:
 	struct EventContext
 	{
 		Event* ev;
-		EventLoop* loop;
+		Denser* denser;
 		HANDLE timer;
 		EventContext *next, *previous;
 
-		EventContext(Event* ev, EventLoop* loop) : ev(ev), loop(loop), timer(NULL), next(NULL), previous(NULL) {}
+		EventContext(Event* ev, Denser* denser) : ev(ev), denser(denser), timer(NULL), next(NULL), previous(NULL) {}
 	};
 
 	LONG maxPendingEvents;
 	LONG eventSourceCount;
 	LONG pendingEventCount;
+	LONG denserCount;
 	BOOL shutdownMode;
-	Denser* denser;
 	HANDLE signalEvent;
 	EventContext *pendingDelayedEvents;
 
@@ -62,16 +62,17 @@ private:
 
 public:
 	HANDLE threadHandle;
-	HRESULT lastEventResult;	
 
-	EventLoop(LONG maxPendingEvents, Denser* denser);
+	EventLoop(LONG maxPendingEvents);
 	~EventLoop();
 
-	HRESULT PostEvent(Event *ev);
-	HRESULT PostEvent(Event *ev, LONG delayMilliseconds);
+	HRESULT PostEvent(Denser* denser, Event *ev);
+	HRESULT PostEvent(Denser* denser, Event *ev, LONG delayMilliseconds);
 	HRESULT RunLoop();	
 	void EventSourceAdded();
 	void EventSourceRemoved();
+	void DenserAdded();
+	void DenserRemoved();
 	HRESULT EnterShutdownMode();
 	void ReleaseResources();
 };

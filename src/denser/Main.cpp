@@ -11,33 +11,43 @@ BOOL WINAPI ControlHandler(DWORD type)
 
 HRESULT Help()
 {
-	_tprintf(_T("Usage: denser [/config <configfile>] | ([/admin <admin_url> (anonymous|<authorizationKey>)] [<jsfile>]*)\nNote: v8.dll must be in the same directory as denser.exe."));
+	_tprintf(_T("Usage: denser [/useContext] [/config <configfile>] | ([/admin <admin_url> (anonymous|<authorizationKey>)] [<jsfile>]*)\nNote: v8.dll must be in the same directory as denser.exe."));
 	_tprintf(_T("denser.exe --help for V8 options."));
 	return -1;
 }
 
-HRESULT CreateConfig(int argc, _TCHAR* argv[], CAtlString *config)
+HRESULT CreateConfig(int argc, _TCHAR* argv[], CAtlString *config, bool* useContextIsolation)
 {
 	if (argc < 2)
 	{
 		return Help();
 	}	
 
-	if (0 == _tcsicmp(L"/config", argv[1]))
+	*useContextIsolation = false;
+
+	int parameter = 1;
+
+	if (true == (*useContextIsolation = (0 == _tcsicmp(L"/useContext", argv[parameter]))))
 	{
-		if (argc != 3)
+		parameter++;
+	}
+
+	if (argc > parameter && 0 == _tcsicmp(L"/config", argv[parameter]))
+	{
+		if (argc != 4)
 		{
 			return Help();
 		}
 
+		parameter++;
+
 		LPWSTR tmp;
-		ErrorIf(NULL == (tmp = Denser::GetFileContentAsUnicode(argv[2])));
+		ErrorIf(NULL == (tmp = Denser::GetFileContentAsUnicode(argv[parameter])));
 		config->Append(tmp);
 		free(tmp);
 	}
 	else 
 	{
-		int parameter = 1;
 		config->Append(L"{");
 		if (0 == _tcsicmp(L"/admin", argv[parameter]))
 		{
@@ -80,6 +90,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	char** argv1 = NULL;
 	char** argv1cpy = NULL;
 	_TCHAR** argv2 = NULL;
+	bool useContextIsolation;
 
 	ErrorIf(NULL == (argv1 = new char*[argc + 1]));
 	RtlZeroMemory(argv1, sizeof(char*) * (argc + 1));
@@ -100,8 +111,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		ErrorIf(NULL == (argv2[i] = (_TCHAR*)::AllocAsciiToUnicode(argv1[i], strlen(argv1[i]), NULL)));
 	}
 	
-	ErrorIf(S_OK != CreateConfig(argc, argv2, &config));
-	manager = new DenserManager();
+	ErrorIf(S_OK != CreateConfig(argc, argv2, &config, &useContextIsolation));
+	manager = new DenserManager(useContextIsolation);
 	ErrorIf(0 == SetConsoleCtrlHandler(::ControlHandler, TRUE));
 	HRESULT result = manager->Run(config);
 	delete manager;

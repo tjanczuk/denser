@@ -170,5 +170,5 @@ HRESULT HttpManager::EnterShutdownMode()
 	v8::HandleScope hs;
 	Event* ev = (Event *) new SimpleEvent(this->denser, this->shutdown, 0, NULL);
 	ev->ignorable = false;
-	return this->denser->loop->PostEvent(ev);
+	return this->denser->loop->PostEvent(this->denser, ev);
 }

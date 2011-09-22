@@ -2,8 +2,9 @@
 
 DenserManager* DenserManager::singleton = NULL;
 
-DenserManager::DenserManager()
-	: admin(NULL), root(NULL), activeDenserCount(0), completionEvent(NULL), isShuttingDown(false)
+DenserManager::DenserManager(bool useContextIsolation)
+	: admin(NULL), root(NULL), activeDenserCount(0), completionEvent(NULL), isShuttingDown(false), 
+	useContextIsolation(useContextIsolation), isolate(NULL), loop(NULL)
 {
 	InitializeCriticalSection(&this->syncRoot);
 }
@@ -24,6 +25,16 @@ DenserManager::~DenserManager()
 		Denser* tmp = this->root;
 		this->root = this->root->next;
 		delete tmp;
+	}
+	if (this->loop)
+	{
+		delete this->loop;
+		this->loop = NULL;
+	}
+	if (this->isolate)
+	{
+		this->isolate->Dispose();
+		this->isolate = NULL;
 	}
 	DeleteCriticalSection(&this->syncRoot);
 }
@@ -142,8 +153,14 @@ unsigned int WINAPI DenserManager::DenserAdminWorker(void* arg)
 	bool timerStarted = false;
 	bool denserAdded = false;
 
+	if (DenserManager::singleton->useContextIsolation)
+	{
+		ErrorIf(NULL == (DenserManager::singleton->isolate = v8::Isolate::New()));
+		ErrorIf(NULL == (DenserManager::singleton->loop = new EventLoop(MAX_EVENT_LOOP_LENGTH)));
+	}
+
 	RtlZeroMemory(&programId, sizeof(programId));
-	DenserManager::singleton->admin = new Denser(programId, DenserManager::singleton->listener);	
+	DenserManager::singleton->admin = new Denser(programId, DenserManager::singleton->listener, DenserManager::singleton->isolate, DenserManager::singleton->loop);	
 	ErrorIf(S_OK != DenserManager::singleton->AddDenser(DenserManager::singleton->admin));
 	denserAdded = true;
 	ErrorIf(S_OK != DenserManager::singleton->admin->InitializeRuntime());
@@ -156,7 +173,7 @@ unsigned int WINAPI DenserManager::DenserAdminWorker(void* arg)
 	timerStarted = false;
 	delete [] script;
 	script = NULL;
-	HRESULT result = DenserManager::singleton->admin->ExecuteEventLoop();
+	HRESULT result = DenserManager::singleton->admin->loop->RunLoop();
 	DenserManager::singleton->admin->ReleaseResources();
 	DenserManager::singleton->RemoveDenser(DenserManager::singleton->admin);
 		
@@ -198,10 +215,22 @@ unsigned int WINAPI DenserManager::DenserUserWorker(void* arg)
 	timerStarted = false;
 	delete [] ctx->script;
 	ctx->script = NULL;
-	result = ctx->denser->ExecuteEventLoop();
+	if (!DenserManager::singleton->useContextIsolation)
+	{
+		// we are running denser-specific event loop on a denser-dedicated thread 
 
-	ctx->denser->ReleaseResources();
-	DenserManager::singleton->RemoveDenser(ctx->denser);
+		result = ctx->denser->loop->RunLoop();
+		ctx->denser->ReleaseResources();
+		DenserManager::singleton->RemoveDenser(ctx->denser);
+	}
+	else
+	{
+		// there is a singleton event loop that will be processing further events
+
+		result = ctx->denser->result;
+		DenserManager::singleton->RemoveDenser(ctx->denser);
+	}
+		
 	delete ctx;
 
 	return result;
@@ -400,7 +429,7 @@ v8::Handle<v8::Value> DenserManager::StartProgram(const v8::Arguments& args)
 	int len = wcslen((WCHAR*)*script) + 1;
 	ErrorIf(NULL == (ctx->script = new WCHAR[len]));
 	memcpy(ctx->script, *script, len * sizeof WCHAR);
-	ctx->denser = new Denser(programId, DenserManager::singleton->listener);	
+	ctx->denser = new Denser(programId, DenserManager::singleton->listener, DenserManager::singleton->isolate, DenserManager::singleton->loop);	
 	ErrorIf((result = DenserManager::CreateProgramIdWithDenserExtension(denser, ctx->denser, programId)).IsEmpty());
 	ErrorIf(S_OK != DenserManager::StartProgramCore(ctx));
 
@@ -430,7 +459,18 @@ HRESULT DenserManager::StartProgramCore(START_PROGRAM_CONTEXT* ctx)
 	// If activation is successful, this refcount is decreased from DenserManager::DenserUserWorker
 	DenserManager::singleton->AddDenser(NULL); 
 	ErrorIf(DenserManager::singleton->isShuttingDown);
-	ErrorIf(-1L ==  _beginthreadex(NULL, WORKER_THREAD_STACK_SIZE, DenserManager::DenserUserWorker, (void*)ctx, 0, NULL));
+	if (DenserManager::singleton->useContextIsolation)
+	{
+		// each program runs on the same thread in the same v8::Isolate, but in different v8::Context
+
+		DenserManager::DenserUserWorker(ctx);
+	}
+	else
+	{
+		// each program runs in its own thread within its own v8::Isolate 
+
+		ErrorIf(-1L ==  _beginthreadex(NULL, WORKER_THREAD_STACK_SIZE, DenserManager::DenserUserWorker, (void*)ctx, 0, NULL));
+	}
 	
 	LEAVE_CS(DenserManager::singleton->syncRoot)
 

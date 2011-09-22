@@ -49,19 +49,21 @@ public:
 	HRESULT result;
 	LPWSTR script;
 	LogModule* log;
+	bool useContextIsolation;
+	bool loopRefCountAdded;
 
-	Denser(GUID programId, HttpListener* http);
+	Denser(GUID programId, HttpListener* http, v8::Isolate* isolate, EventLoop* loop);
 	~Denser();
 
 	static LPWSTR LoadFileInResource(int name, int type);
 	static LPWSTR GetFileContentAsUnicode(LPCWSTR fileName);
 	HRESULT InitializeRuntime();
 	HRESULT ExecuteScript(LPWSTR script);
-	HRESULT ExecuteEventLoop();
 	void EventSourceAdded();
 	void EventSourceRemoved();
 	HRESULT InitiateShutdown();
 	void ReleaseResources();
+	void SetLastResult(HRESULT result);
 
 	static v8::Handle<v8::Value> ConsoleWrite(const v8::Arguments& args);
 	static v8::Handle<v8::Value> PostEventDelayed(const v8::Arguments& args);	

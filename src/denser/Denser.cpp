@@ -1,9 +1,10 @@
 #include "stdafx.h"
 
-Denser::Denser(GUID programId, HttpListener* http)
+Denser::Denser(GUID programId, HttpListener* http, v8::Isolate* isolate, EventLoop* loop)
 	: scriptError(S_OK), meter(NULL), programId(programId), http(http), next(NULL), result(S_OK), httpManager(NULL),
-	script(NULL), initialized(FALSE), isolate(NULL)
+	script(NULL), initialized(FALSE), isolate(isolate), loop(loop), loopRefCountAdded(false)
 {
+	this->useContextIsolation = isolate != NULL;
 	InitializeCriticalSection(&this->syncRoot);
 }
 
@@ -12,7 +13,9 @@ Denser::~Denser()
 	this->ReleaseResources();
 	if (this->loop)
 	{
-		delete this->loop;
+		if (!this->useContextIsolation)
+			delete this->loop;
+		this->loop = NULL;
 	}
 	if (this->httpManager)
 	{
@@ -48,9 +51,8 @@ void Denser::ReleaseResources()
 				delete this->modules[i];
 			}
 			this->modules.RemoveAll();
-			if (this->loop)
+			if (this->loop && !this->useContextIsolation)
 			{
-				this->result = this->loop->lastEventResult;
 				this->loop->ReleaseResources();
 			}
 			if (this->httpManager)
@@ -65,7 +67,8 @@ void Denser::ReleaseResources()
 			this->context.Dispose();
 			this->context = v8::Persistent<v8::Context>();
 			this->isolate->Exit();
-			this->isolate->Dispose();
+			if (!this->useContextIsolation)
+				this->isolate->Dispose();				
 			this->isolate = NULL;
 			this->initialized = FALSE;
 		}
@@ -76,7 +79,10 @@ void Denser::ReleaseResources()
 
 HRESULT Denser::InitializeRuntime()
 {
-	this->isolate = v8::Isolate::New();
+	if (!this->useContextIsolation)
+	{
+		this->isolate = v8::Isolate::New();
+	}
 	v8::Isolate::Scope is(this->isolate);
 	v8::HandleScope hs;
 	v8::Handle<v8::ObjectTemplate> global = v8::ObjectTemplate::New();
@@ -90,11 +96,26 @@ HRESULT Denser::InitializeRuntime()
 	// TODO, tjanczuk, the max number of log entires be configurable
 	this->log = new LogModule(MAX_LOG_ENTRIES);
 	this->meter = new MeterModule(this->context, this->programId);
-	// TODO, tjanczuk, the max event loop length should be configurable
-	this->loop = new EventLoop(MAX_EVENT_LOOP_LENGTH, this);	
+	if (!this->useContextIsolation)
+	{
+		// TODO, tjanczuk, the max event loop length should be configurable
+		this->loop = new EventLoop(MAX_EVENT_LOOP_LENGTH);	
+	}
+	this->loop->DenserAdded();
+	this->loopRefCountAdded = true;
 	this->initialized = TRUE;
 
 	return S_OK;
+}
+
+void Denser::SetLastResult(HRESULT result)
+{
+	this->result = result;
+	if (S_OK != result && this->loopRefCountAdded)
+	{
+		this->loopRefCountAdded = false;
+		this->loop->DenserRemoved();
+	}
 }
 
 HRESULT Denser::ExecuteScript(LPWSTR script)
@@ -149,7 +170,7 @@ v8::Handle<v8::Value> Denser::PostEventDelayed(const v8::Arguments& args)
 
 	dueTimeIn = args[1]->Int32Value();
 	ev = (Event*)new SimpleEvent(denser, args[0]->ToObject(), 0, NULL);
-	ErrorIf(S_OK != denser->loop->PostEvent(ev, dueTimeIn));
+	ErrorIf(S_OK != denser->loop->PostEvent(denser, ev, dueTimeIn));
 	
 	return v8::Undefined();
 
@@ -169,7 +190,7 @@ v8::Handle<v8::Value> Denser::PostEventAsap(const v8::Arguments& args)
     JS_ARGS
 
 	SimpleEvent* ev = new SimpleEvent(denser, args[0]->ToObject(), 0, NULL);
-	ErrorIf(S_OK != denser->loop->PostEvent((Event*)ev));
+	ErrorIf(S_OK != denser->loop->PostEvent(denser, (Event*)ev));
 
 	return v8::Undefined();
 Error:
@@ -707,15 +728,6 @@ LPWSTR Denser::LoadFileInResource(int name, int type)
 	LPWSTR result = (LPWSTR)::AllocAsciiToUnicode(resource, size, NULL);
 	
 	return result;
-}
-
-HRESULT Denser::ExecuteEventLoop()
-{
-	v8::Isolate::Scope is(this->isolate);
-	v8::Context::Scope cs(this->context);
-	v8::HandleScope hs;
-
-	return this->loop->RunLoop();
 }
 
 void Denser::EventSourceAdded()

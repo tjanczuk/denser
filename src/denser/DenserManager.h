@@ -20,6 +20,9 @@ private:
 	HANDLE completionEvent;
 	bool isShuttingDown;
 	CRITICAL_SECTION syncRoot;
+	bool useContextIsolation;
+	v8::Isolate *isolate;
+	EventLoop *loop;
 
 	HRESULT AddAdminImports(LPCWSTR config);
 	HRESULT AddDenser(Denser* denser);
@@ -40,7 +43,7 @@ private:
 public:
 	static DenserManager* singleton;
 
-	DenserManager();
+	DenserManager(bool useContextIsolation);
 	~DenserManager();
 
 	HRESULT Run(LPCWSTR config);
