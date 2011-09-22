@@ -126,4 +126,4 @@ scheduleDanteQuote(); // schedule a post of Dante's Divine Comedy (Cante I, The 
 
 publishUsageUpdate(); // publish once on startup to ensure every new client receives an immediate update
 
-tracing.write("Chat server running. Navigate to http://localhost/chat/" + programId + " with the browser. Press Ctrl-C to terminate the server.");
+tracing.write("Chat started at http://localhost/chat/" + programId);
