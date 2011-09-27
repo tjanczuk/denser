@@ -34,7 +34,7 @@ HRESULT CreateConfig(int argc, _TCHAR* argv[], CAtlString *config, bool* useCont
 
 	if (argc > parameter && 0 == _tcsicmp(L"/config", argv[parameter]))
 	{
-		if (argc != 4)
+		if (argc < 3)
 		{
 			return Help();
 		}
